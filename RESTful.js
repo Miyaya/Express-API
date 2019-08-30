@@ -13,7 +13,7 @@ var pool = mysql.createPool({
     database: 'membership'
 });
 
-pool.getConnection(function(err) {
+pool.getConnection((err) => {
     if (err) {
         throw err;
     }
@@ -28,9 +28,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var restAPI = express.Router();
 
 // read all accounts uri='/'
-restAPI.get('/', function(req, res) {
-    //res.json({ message: "hello world" });
-    pool.query('SELECT * FROM members', function(err, result, field){
+restAPI.get('/', (req, res) => { // arrow function expression equals to: function(req, res) {
+    pool.query('SELECT * FROM members', (err, result, field) => {
         if(err) {
             throw err;
         }
@@ -39,9 +38,9 @@ restAPI.get('/', function(req, res) {
 });
 
 // read an account uri='/:account'
-restAPI.get('/:account', function(req, res) {
+restAPI.get('/:account', (req, res) => {
     pool.query('SELECT * FROM members WHERE account = ?',[req.params.account],
-    function(err, result, field) {
+    (err, result, field) => {
         if(err) {
             throw err;
         }
@@ -50,24 +49,22 @@ restAPI.get('/:account', function(req, res) {
 });
 
 // create uri='/'
-restAPI.post('/', function(req, res) {
-    //res.json({ name: req.body.name, message: "success"});
+restAPI.post('/', (req, res) => {
     pool.query('INSERT INTO members VALUES (?, ?, ?, ?, ?, ?)',
         [req.body.account, req.body.phone, req.body.birthday, req.body.address, 
             req.body.data_added_time, req.body.last_modified_time],
-        function(err, result, field) {
+        (err, result, field) => {
             if(err) {
                 throw err;
             }
-            console.log(result.affectedRows + " record updated");
+            console.log(result.affectedRows + " record(s) updated");
             res.json({result: 'success'});
         });
 
 });
 
 // update uri='/:account'
-restAPI.put('/:account', function(req, res) {
-    //res.json({ id:req.params.id, message: "update " + req.params.id });
+restAPI.put('/:account', (req, res) => {
     var str = 'UPDATE members SET ';
     var list = [];
     var flag = false;
@@ -94,24 +91,23 @@ restAPI.put('/:account', function(req, res) {
     str += 'last_modified_time = ? WHERE account = ?';
     list.push(req.body.last_modified_time);
     list.push(req.params.account);
-    pool.query(str, list, function(err, result, field) {
+    pool.query(str, list, (err, result, field) => {
         if(err) {
             throw err;
         }
-        console.log(result.affectedRows + " record updated");
+        console.log(result.affectedRows + " record(s) updated");
         res.json({result: 'success'});
     })
 });
 
 // delete uri='/:account'
 restAPI.delete('/:account', function(req, res) {
-    //res.json({ id: req.params.id, message: "byebye " + req.params.id });
     pool.query('DELETE FROM members WHERE account = ?', [req.params.account],
     function(err, result, field) {
         if(err) {
             throw err;
         }
-        console.log(result.affectedRows + " record updated");
+        console.log(result.affectedRows + " record(s) updated");
         res.json({result: 'success'});
     });
 })
@@ -119,14 +115,5 @@ restAPI.delete('/:account', function(req, res) {
 // attach the route for restAPI
 app.use('/', restAPI);
 app.listen(3000, function() {
-    console.log('listening for 3000...');
+    console.log('listening on 3000...');
 })
-
-// conn.end(function(err) {
-//     if(err) {
-//         return;
-//     }
-//     else {
-//         console.log('connecting end');
-//     }
-// });
